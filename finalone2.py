@@ -67,7 +67,7 @@ class Gui(QWidget):
         self.cameras = []
 
         # because we didnt have real camera we use videos insted
-        videoNames = ["2.mp4", "2.mp4", "2.mp4", "2.mp4"]
+        videoNames = ["2.mp4", "3.mp4", "4.mp4", "5.mp4"]
 
         for i in range(4):
             self.cameras.append(Camera(videoNames[i], self.videoLabels[i], str(i), Road(str(i))))
@@ -145,11 +145,9 @@ class Gui(QWidget):
     def update_timer(self):
 
         try:
-
             # here update time each second and decreament time
             self.traffics[int(self.roadID)].greenTime -= 1
             self.traffics[int(self.roadID)].remineTimeLabel.setText(str(self.traffics[int(self.roadID)].greenTime))
-
 
             # this run if we second 30
             if self.traffics[int(self.roadID)].greenTime == 30:
@@ -176,7 +174,7 @@ class Gui(QWidget):
             if self.traffics[int(self.roadID)].greenTime == 0:
                 self.cameras[int(self.roadID)].pause = True
                 self.traffics[int(self.roadID)].roadLabel.setText("Road #" + str(int(self.roadID) + 1) + " CLOSED")
-                # here we complete work by tke ruslet and pass it to Camera method then to CalcGreen Time
+                # we complete work by the result and pass it to Camera method then to CalcGreen Time
                 if len(self.openroads) == 0:
                     detections = self.model.my_queue.get(False)
 
@@ -191,7 +189,6 @@ class Gui(QWidget):
 
                             camera.countVeichles(detections[i])
                             road_veichles.setdefault(camera.road.roadID, camera.road.getVeichles())
-                            # road_veichles.append(camera.road.getVeichles())
                             i += 1
                     road_and_time = TrafficLight.calcGreenTime(road_veichles, self.veichlesTypes)
                     self.start_timer(road_and_time)
@@ -413,7 +410,7 @@ class TrafficLight():
             # road_times.append()
             road_times.setdefault(road, int(Helper.GST(number, 4, veichles_types)))
         # print(road_times)
-        print("tmaaam1")
+        # print("tmaaam1")
         return Helper.piror(road_times , road_veichles)
 
 class Model:
@@ -533,7 +530,6 @@ class Helper:
     # Return Greean Time
     @staticmethod
     def GST( detections, noLanes, types):
-
         sum = 0
         i = 0
         for type in types:
@@ -541,35 +537,26 @@ class Helper:
             i += 1
 
         return ceil(float(sum) / float(noLanes))
-
     # Piroir part is here
     @staticmethod
     def piror(road_times, road_veichles):
+        print(road_times)
         try:
             road_and_time = {}
-            print(road_times)
-
-            # max = list(road_times.values())[0]
-            # index = list(road_times.keys())[0]
-            # pervMax = list(road_times.values())[0]
-            # pervIndex = list(road_times.keys())[0]
-
-            max = 0
-            index = None
-            pervMax = 0
-            pervIndex =None
 
             for road, veichles in road_veichles.items():
                 if (list(veichles.values())[5] > 0 or list(veichles.values())[6] > 0):
                     pass
                     road_and_time.setdefault(road, list(road_times.values())[int(road)])
                     road_times.pop(road)
-                    # road_and_time.setdefault(index, max)
-            print(road_times)
-            print(road_and_time)
+
+            max = 0
+            index = None
+            pervMax = 0
+            pervIndex = None
 
             if(len(road_and_time) < 2):
-                print("here")
+                # print("here")
                 # print(len(road_and_time))
                 for road, time in road_times.items():
                     if( time >= max):
@@ -577,18 +564,22 @@ class Helper:
                         pervIndex = index
                         max = time
                         index = road
-                print(str(index)     + " "+ str(max))
+
                 if( len(road_and_time) == 0):
                     road_and_time.setdefault(pervIndex, pervMax)
                     road_and_time.setdefault(index, max)
+
                 if(len(road_and_time)== 1):
                     road, time = road_and_time.popitem()
-                    # if(index == road and time == max):
-                    #     road_and_time.setdefault(pervIndex, pervMax)
-                    # else:
-                    road_and_time.setdefault(index , max)
 
+                    road_and_time.setdefault(index , max)
                     road_and_time.setdefault(road, time)
+            # print(road_and_time)
+
+            for road , time in road_and_time.items():
+                if (time < 7):
+                    road_and_time[road] = 9
+                    print("ues")
             print(road_and_time)
             return road_and_time
 
