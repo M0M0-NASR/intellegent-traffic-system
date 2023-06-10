@@ -58,7 +58,7 @@ class Gui(QWidget):
 
             # init traffic timer
             self.timer = QTimer(self.traffics[i].frame)
-            self.timer.setInterval(1000)
+            self.timer.setInterval(500)
             self.timer.timeout.connect(self.update_timer)
 
     def connectCameras(self):
@@ -84,6 +84,9 @@ class Gui(QWidget):
             print(e.tb_lineno)
 
     def predict(self):
+        self.t  = 1
+
+
         # this run at first for one time then system start with itself
         try:
             # take four frames and add it in frames list
@@ -144,6 +147,7 @@ class Gui(QWidget):
 
     def update_timer(self):
 
+
         try:
             # here update time each second and decreament time
             self.traffics[int(self.roadID)].greenTime -= 1
@@ -195,6 +199,8 @@ class Gui(QWidget):
 
                 else:
                     self.start_timer(self.openroads)
+                self.t += 1
+                print("tries = " + str(self.t))
             print(self.traffics[int(self.roadID)].greenTime)
 
         except Exception as ex:
@@ -540,20 +546,22 @@ class Helper:
     # Piroir part is here
     @staticmethod
     def piror(road_times, road_veichles):
-        print(road_times)
+        # print(road_times)
         try:
             road_and_time = {}
+
+            max = 0
+            index = None
+            pervMax = 0
+            pervIndex = None
 
             for road, veichles in road_veichles.items():
                 if (list(veichles.values())[5] > 0 or list(veichles.values())[6] > 0):
                     pass
                     road_and_time.setdefault(road, list(road_times.values())[int(road)])
                     road_times.pop(road)
-
-            max = 0
-            index = None
-            pervMax = 0
-            pervIndex = None
+            print("1")
+            print(road_and_time)
 
             if(len(road_and_time) < 2):
                 # print("here")
@@ -574,16 +582,34 @@ class Helper:
 
                     road_and_time.setdefault(index , max)
                     road_and_time.setdefault(road, time)
-            # print(road_and_time)
+            print("2")
+            print(road_and_time)
+
+            r, i = 0,0;
 
             for road , time in road_and_time.items():
+
+
                 if (time < 7):
                     road_and_time[road] = 9
+                if ( road == None):
+                    r , i =  road_times.popitem()
+                    road_and_time.pop(road)
+                    road_and_time.setdefault(r,i)
+                    print("road and times ==")
+                    print(road_times)
                     print("ues")
+                    break
+
+            print("3")
+
             print(road_and_time)
+            print(road_times)
             return road_and_time
 
         except Exception as e:
+
+            print("error")
             print(e)
 
 if __name__ == '__main__':
@@ -592,3 +618,5 @@ if __name__ == '__main__':
     window.move(30,10)
     window.show()
     sys.exit(app.exec_())
+
+    # {'0': 9, '1': 2, '2': 8, '3': 10}
