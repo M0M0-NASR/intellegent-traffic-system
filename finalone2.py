@@ -58,7 +58,7 @@ class Gui(QWidget):
 
             # init traffic timer
             self.timer = QTimer(self.traffics[i].frame)
-            self.timer.setInterval(500)
+            self.timer.setInterval(1000)
             self.timer.timeout.connect(self.update_timer)
 
     def connectCameras(self):
@@ -412,9 +412,13 @@ class TrafficLight():
     def calcGreenTime(cls,road_veichles , veichles_types):
 
         road_times = {}
+        t = 0
         for road, number in road_veichles.items():
             # road_times.append()
-            road_times.setdefault(road, int(Helper.GST(number, 4, veichles_types)))
+            t = int(Helper.GST(number, 4, veichles_types))
+            if(t < 8):
+                t = 9
+            road_times.setdefault(road, t)
         # print(road_times)
         # print("tmaaam1")
         return Helper.piror(road_times , road_veichles)
@@ -546,7 +550,7 @@ class Helper:
     # Piroir part is here
     @staticmethod
     def piror(road_times, road_veichles):
-        # print(road_times)
+        print(road_times)
         try:
             road_and_time = {}
 
@@ -561,7 +565,7 @@ class Helper:
                     road_and_time.setdefault(road, list(road_times.values())[int(road)])
                     road_times.pop(road)
             print("1")
-            print(road_and_time)
+            # print(road_and_time)
 
             if(len(road_and_time) < 2):
                 # print("here")
@@ -583,19 +587,19 @@ class Helper:
                     road_and_time.setdefault(index , max)
                     road_and_time.setdefault(road, time)
             print("2")
-            print(road_and_time)
+            # print(road_and_time)
 
-            r, i = 0,0;
+            r, i = (0,0);
 
             for road , time in road_and_time.items():
 
 
-                if (time < 7):
-                    road_and_time[road] = 9
+
                 if ( road == None):
                     r , i =  road_times.popitem()
                     road_and_time.pop(road)
                     road_and_time.setdefault(r,i)
+                    road_and_time = {key: value for key, value in sorted(road_and_time.items(), key=lambda item: item[1])}
                     print("road and times ==")
                     print(road_times)
                     print("ues")
@@ -604,7 +608,7 @@ class Helper:
             print("3")
 
             print(road_and_time)
-            print(road_times)
+            # print(road_times)
             return road_and_time
 
         except Exception as e:
